@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Image from 'next/image'
@@ -73,7 +73,7 @@ function DishDetail({ dish, t, onAdd }: { dish: Dish; t: T; onAdd: (item: CartIt
 
         <section>
           <h4 className="text-sm font-semibold">{t.ingredients}</h4>
-          <p className="mt-1.5 text-sm text-muted-foreground">{dish.ingredients.join(' · ')}</p>
+          <p className="mt-1.5 text-sm text-muted-foreground">{dish.ingredients.join(' ┬À ')}</p>
           <h4 className="mt-4 text-sm font-semibold">{t.allergens}</h4>
           <div className="mt-1.5 flex flex-wrap gap-1.5">
             {dish.allergens.length === 0 ? (

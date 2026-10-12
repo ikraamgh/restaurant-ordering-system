@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Image from 'next/image'
 import { Coffee, CupSoda, IceCreamCone, Moon, Sun, type LucideIcon } from 'lucide-react'

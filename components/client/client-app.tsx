@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -37,7 +37,7 @@ export function ClientApp({ table }: { table: number }) {
       return [...prev, item]
     })
     setActiveDish(null)
-    toast.success(`${item.quantity} × ${item.name}`, { duration: 1800 })
+    toast.success(`${item.quantity} ├ù ${item.name}`, { duration: 1800 })
   }, [])
 
   const updateQuantity = useCallback((key: string, quantity: number) => {
@@ -49,7 +49,7 @@ export function ClientApp({ table }: { table: number }) {
     setCart([])
     setCartOpen(false)
     setOrdersOpen(true)
-    toast.success(`Commande n°${number} envoyée en cuisine`)
+    toast.success(`Commande n┬░${number} envoy├®e en cuisine`)
   }
 
   if (!state) return <AppLoader />
@@ -59,7 +59,7 @@ export function ClientApp({ table }: { table: number }) {
     return (
       <main className="flex min-h-dvh flex-col items-center justify-center gap-2 p-6 text-center">
         <h1 className="font-serif text-2xl font-semibold">Table introuvable</h1>
-        <p className="text-muted-foreground">Ce QR code ne correspond à aucune table active. Veuillez appeler un serveur.</p>
+        <p className="text-muted-foreground">Ce QR code ne correspond ├á aucune table active. Veuillez appeler un serveur.</p>
       </main>
     )
   }

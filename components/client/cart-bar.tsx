@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { ShoppingBag } from 'lucide-react'
 import { formatPrice } from '@/lib/format'

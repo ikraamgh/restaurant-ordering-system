@@ -1,24 +1,103 @@
 /* ═══════════════════════════════════════════════
-   RESTO QR — Types centraux
+   Types — Hybride : Client ancien + Super Admin nouveau
    ═══════════════════════════════════════════════ */
 
-/** Texte multilingue : { fr: '...', en: '...', ar: '...' } */
-export type MLText = Record<string, string>
+/* ── Client (ancien format complet) ─────────────── */
 
-export type Language = {
-  code: string
+export type Moment = 'breakfast' | 'lunch' | 'dinner' | 'drinks' | 'desserts'
+
+export type DishTag = 'vegetarian' | 'spicy' | 'meat' | 'fish' | 'dessert'
+
+export type Extra = { id: string; label: string; price: number }
+
+export type Dish = {
+  id: string
   name: string
-  flag: string       // emoji drapeau
-  dir: 'ltr' | 'rtl'
+  moments: Moment[]
+  category: string
+  price: number
+  description: string
+  ingredients: string[]
+  allergens: string[]
+  spiceLevel: 0 | 1 | 2 | 3
+  portion: string
+  image: string
+  tags: DishTag[]
+  removable: string[]
+  extras: Extra[]
+  available: boolean
+  popular?: boolean
+  /** Optionnels – utilisés par le Super Admin */
+  restaurantId?: string
+  categoryId?: string
 }
 
-export const LANGUAGES: Language[] = [
-  { code: 'fr', name: 'Français',  flag: '🇫🇷', dir: 'ltr' },
-  { code: 'en', name: 'English',   flag: '🇬🇧', dir: 'ltr' },
-  { code: 'ar', name: 'العربية',   flag: '🇲🇦', dir: 'rtl' },
-]
+export type SpicePreference = 'normal' | 'mild' | 'hot'
 
-/* ── Restaurants ─────────────────────────────── */
+export type CartItem = {
+  key: string
+  dishId: string
+  name: string
+  unitPrice: number
+  quantity: number
+  removed: string[]
+  extras: Extra[]
+  spice: SpicePreference
+  note: string
+}
+
+/** Statuts du cycle de vie d'une commande (espace client + serveur) */
+export type OrderStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'preparing'
+  | 'ready'
+  | 'served'
+  | 'cancelled'
+  | 'paid'   // ← ajouté pour que le Super Admin puisse filtrer les commandes payées
+
+export type PaymentMethod = 'counter' | 'table'
+
+export type Order = {
+  id: string
+  number: number
+  table: number
+  items: CartItem[]
+  total: number
+  status: OrderStatus
+  payment: PaymentMethod
+  createdAt: number
+  updatedAt: number
+  rating?: number
+  comment?: string
+  /** Optionnel – utilisé par le Super Admin pour filtrer par restaurant */
+  restaurantId?: string
+}
+
+export type BillRequest = {
+  id: string
+  table: number
+  createdAt: number
+  resolved: boolean
+}
+
+export type TableInfo = {
+  id?: string           // optionnel – utilisé par le Super Admin
+  number: number
+  seats: number
+  zone: string
+  /** Optionnel – utilisé par le Super Admin pour filtrer par restaurant */
+  restaurantId?: string
+}
+
+export type Staff = {
+  id: string
+  name: string
+  role: 'admin' | 'serveur' | 'cuisine'
+  active: boolean
+}
+
+/* ── Restaurants (enrichi avec nouveaux champs Super Admin) ── */
 
 export type Restaurant = {
   id: string
@@ -29,11 +108,16 @@ export type Restaurant = {
   description: string
   logo: string
   status: 'active' | 'suspended'
-  languages: string[]   // codes langue activés pour ce resto
+  plan: 'starter' | 'growth' | 'enterprise'
   createdAt: number
+  scanOrders: number
+  /** Langues activées pour le menu client (ex: ['fr', 'en', 'ar']) */
+  languages: string[]
 }
 
-/* ── Menu ────────────────────────────────────── */
+/* ── Catégories (Super Admin seulement) ─────────── */
+
+export type MLText = Record<string, string>
 
 export type Category = {
   id: string
@@ -42,60 +126,17 @@ export type Category = {
   order: number
 }
 
-export type Dish = {
-  id: string
-  restaurantId: string
-  categoryId: string
-  name: MLText
-  description: MLText
-  price: number
-  image: string
-  available: boolean
-  popular?: boolean
-}
-
-/* ── Tables ──────────────────────────────────── */
-
-export type TableInfo = {
-  id: string
-  restaurantId: string
-  number: number
-  seats: number
-  zone: string
-}
-
-/* ── Commandes ───────────────────────────────── */
-
-export type CartItem = {
-  key: string
-  dishId: string
-  name: string        // nom dans la langue du client
-  unitPrice: number
-  quantity: number
-}
-
-export type OrderStatus = 'active' | 'paid'
-
-export type Order = {
-  id: string
-  number: number
-  restaurantId: string
-  tableNumber: number
-  lang: string
-  items: CartItem[]
-  total: number
-  status: OrderStatus
-  createdAt: number
-  paidAt?: number
-}
-
-/* ── État global ─────────────────────────────── */
+/* ── État global ─────────────────────────────────── */
 
 export type AppState = {
   restaurants: Restaurant[]
-  categories: Category[]
+  activeRestaurantId: string
   dishes: Dish[]
   tables: TableInfo[]
   orders: Order[]
+  billRequests: BillRequest[]
+  staff: Staff[]
   nextOrderNumber: number
+  /** Catégories gérées par le Super Admin */
+  categories: Category[]
 }

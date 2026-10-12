@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Check, ChefHat, Clock, HandPlatter, ReceiptText, Star } from 'lucide-react'
@@ -13,9 +13,9 @@ import type { DICT } from './i18n'
 type T = (typeof DICT)['fr']
 
 const STEPS: { status: OrderStatus; label: string; icon: typeof Clock }[] = [
-  { status: 'pending', label: 'Reçue', icon: Clock },
+  { status: 'pending', label: 'Re├ºue', icon: Clock },
   { status: 'preparing', label: 'En cuisine', icon: ChefHat },
-  { status: 'ready', label: 'Prête', icon: HandPlatter },
+  { status: 'ready', label: 'Pr├¬te', icon: HandPlatter },
   { status: 'served', label: 'Servie', icon: Check },
 ]
 const STEP_INDEX: Record<OrderStatus, number> = { pending: 0, confirmed: 0.5, preparing: 1, ready: 2, served: 3, cancelled: -1 }
@@ -67,7 +67,7 @@ export function OrdersSheet({ open, onClose, orders, t, dir, billPending, onRequ
             <li key={o.id} className="rounded-2xl border border-border p-4">
               <div className="flex items-center justify-between gap-2">
                 <div>
-                  <p className="font-semibold">Commande n°{o.number}</p>
+                  <p className="font-semibold">Commande n┬░{o.number}</p>
                   <p className="text-xs text-muted-foreground">{timeAgo(o.createdAt)}</p>
                 </div>
                 <StatusBadge status={o.status} />
@@ -79,7 +79,7 @@ export function OrdersSheet({ open, onClose, orders, t, dir, billPending, onRequ
                 {o.items.map((i) => (
                   <li key={i.key} className="flex justify-between gap-2">
                     <span className="text-muted-foreground">
-                      {i.quantity} × {i.name}
+                      {i.quantity} ├ù {i.name}
                     </span>
                     <span className="tabular-nums">{formatPrice(i.quantity * i.unitPrice)}</span>
                   </li>

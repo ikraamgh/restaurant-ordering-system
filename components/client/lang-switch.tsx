@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { cn } from '@/lib/utils'
 import type { Lang } from './i18n'
@@ -6,33 +6,33 @@ import type { Lang } from './i18n'
 type FlagOption = { flag: string; country: string; lang: Lang }
 
 const FLAGS: FlagOption[] = [
-  { flag: '🇫🇷', country: 'France', lang: 'fr' },
-  { flag: '🇧🇪', country: 'Belgique', lang: 'fr' },
-  { flag: '🇨🇦', country: 'Canada', lang: 'fr' },
-  { flag: '🇨🇭', country: 'Suisse', lang: 'fr' },
-  { flag: '🇲🇦', country: 'Maroc', lang: 'ar' },
-  { flag: '🇩🇿', country: 'Algérie', lang: 'ar' },
-  { flag: '🇹🇳', country: 'Tunisie', lang: 'ar' },
-  { flag: '🇸🇦', country: 'Arabie saoudite', lang: 'ar' },
-  { flag: '🇦🇪', country: 'Émirats arabes unis', lang: 'ar' },
-  { flag: '🇪🇬', country: 'Égypte', lang: 'ar' },
-  { flag: '🇬🇧', country: 'Royaume-Uni', lang: 'en' },
-  { flag: '🇺🇸', country: 'États-Unis', lang: 'en' },
-  { flag: '🇮🇪', country: 'Irlande', lang: 'en' },
-  { flag: '🇦🇺', country: 'Australie', lang: 'en' },
-  { flag: '🇳🇿', country: 'Nouvelle-Zélande', lang: 'en' },
-  { flag: '🇿🇦', country: 'Afrique du Sud', lang: 'en' },
-  { flag: '🇮🇳', country: 'Inde', lang: 'en' },
-  { flag: '🇸🇬', country: 'Singapour', lang: 'en' },
-  { flag: '🇩🇪', country: 'Allemagne', lang: 'en' },
-  { flag: '🇪🇸', country: 'Espagne', lang: 'en' },
-  { flag: '🇮🇹', country: 'Italie', lang: 'en' },
-  { flag: '🇯🇵', country: 'Japon', lang: 'en' },
-  { flag: '🇰🇷', country: 'Corée du Sud', lang: 'en' },
-  { flag: '🇧🇷', country: 'Brésil', lang: 'en' },
+  { flag: '­ƒç½­ƒçÀ', country: 'France', lang: 'fr' },
+  { flag: '­ƒçº­ƒç¬', country: 'Belgique', lang: 'fr' },
+  { flag: '­ƒç¿­ƒçª', country: 'Canada', lang: 'fr' },
+  { flag: '­ƒç¿­ƒç¡', country: 'Suisse', lang: 'fr' },
+  { flag: '­ƒç▓­ƒçª', country: 'Maroc', lang: 'ar' },
+  { flag: '­ƒç®­ƒç┐', country: 'Alg├®rie', lang: 'ar' },
+  { flag: '­ƒç╣­ƒç│', country: 'Tunisie', lang: 'ar' },
+  { flag: '­ƒç©­ƒçª', country: 'Arabie saoudite', lang: 'ar' },
+  { flag: '­ƒçª­ƒç¬', country: '├ëmirats arabes unis', lang: 'ar' },
+  { flag: '­ƒç¬­ƒç¼', country: '├ëgypte', lang: 'ar' },
+  { flag: '­ƒç¼­ƒçº', country: 'Royaume-Uni', lang: 'en' },
+  { flag: '­ƒç║­ƒç©', country: '├ëtats-Unis', lang: 'en' },
+  { flag: '­ƒç«­ƒç¬', country: 'Irlande', lang: 'en' },
+  { flag: '­ƒçª­ƒç║', country: 'Australie', lang: 'en' },
+  { flag: '­ƒç│­ƒç┐', country: 'Nouvelle-Z├®lande', lang: 'en' },
+  { flag: '­ƒç┐­ƒçª', country: 'Afrique du Sud', lang: 'en' },
+  { flag: '­ƒç«­ƒç│', country: 'Inde', lang: 'en' },
+  { flag: '­ƒç©­ƒç¼', country: 'Singapour', lang: 'en' },
+  { flag: '­ƒç®­ƒç¬', country: 'Allemagne', lang: 'en' },
+  { flag: '­ƒç¬­ƒç©', country: 'Espagne', lang: 'en' },
+  { flag: '­ƒç«­ƒç╣', country: 'Italie', lang: 'en' },
+  { flag: '­ƒç»­ƒçÁ', country: 'Japon', lang: 'en' },
+  { flag: '­ƒç░­ƒçÀ', country: 'Cor├®e du Sud', lang: 'en' },
+  { flag: '­ƒçº­ƒçÀ', country: 'Br├®sil', lang: 'en' },
 ]
 
-const ACTIVE_FLAGS: Record<Lang, string> = { fr: '🇫🇷', en: '🇬🇧', ar: '🇲🇦' }
+const ACTIVE_FLAGS: Record<Lang, string> = { fr: '­ƒç½­ƒçÀ', en: '­ƒç¼­ƒçº', ar: '­ƒç▓­ƒçª' }
 
 export function LangSwitch({ lang, onChange, inverted }: { lang: Lang; onChange: (l: Lang) => void; inverted?: boolean }) {
   return (
@@ -48,9 +48,9 @@ export function LangSwitch({ lang, onChange, inverted }: { lang: Lang; onChange:
         aria-label="Langue"
       >
         <optgroup label="Langues disponibles">
-          <option value="fr">🇫🇷 Français</option>
-          <option value="en">🇬🇧 English</option>
-          <option value="ar">🇲🇦 العربية</option>
+          <option value="fr">­ƒç½­ƒçÀ Fran├ºais</option>
+          <option value="en">­ƒç¼­ƒçº English</option>
+          <option value="ar">­ƒç▓­ƒçª Ïº┘äÏ╣Ï▒Ï¿┘èÏ®</option>
         </optgroup>
         <optgroup label="Choisir selon votre pays">
           {FLAGS.filter((flag) => !['fr', 'en', 'ar'].includes(flag.lang) || flag.flag !== ACTIVE_FLAGS[flag.lang]).map((flag) => (
@@ -58,7 +58,7 @@ export function LangSwitch({ lang, onChange, inverted }: { lang: Lang; onChange:
           ))}
         </optgroup>
       </select>
-      <span className="pointer-events-none absolute inset-y-0 end-3 flex items-center text-[10px]">⌄</span>
+      <span className="pointer-events-none absolute inset-y-0 end-3 flex items-center text-[10px]">Ôîä</span>
     </label>
   )
 }
