@@ -1,8 +1,11 @@
 import type { Metadata } from 'next'
-import { SuperAdminApp } from '@/components/admin/super-admin-app'
+import { SuperAdminHome } from '@/components/admin/super-admin-home'
 
-export const metadata: Metadata = { title: 'Super Administration — Dar Zitoun' }
+export const metadata: Metadata = {
+  title: 'Super Administration — Resto QR',
+  description: 'Gestion centralisée des restaurants et statistiques globales',
+}
 
 export default function AdminPage() {
-  return <SuperAdminApp />
+  return <SuperAdminHome />
 }

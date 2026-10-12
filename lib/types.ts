@@ -1,70 +1,24 @@
-export type Moment = 'breakfast' | 'lunch' | 'dinner' | 'drinks' | 'desserts'
+/* ═══════════════════════════════════════════════
+   RESTO QR — Types centraux
+   ═══════════════════════════════════════════════ */
 
-export type DishTag = 'vegetarian' | 'spicy' | 'meat' | 'fish' | 'dessert'
+/** Texte multilingue : { fr: '...', en: '...', ar: '...' } */
+export type MLText = Record<string, string>
 
-export type Extra = { id: string; label: string; price: number }
-
-export type Dish = {
-  id: string
+export type Language = {
+  code: string
   name: string
-  moments: Moment[]
-  category: string
-  price: number
-  description: string
-  ingredients: string[]
-  allergens: string[]
-  spiceLevel: 0 | 1 | 2 | 3
-  portion: string
-  image: string
-  tags: DishTag[]
-  removable: string[]
-  extras: Extra[]
-  available: boolean
-  popular?: boolean
+  flag: string       // emoji drapeau
+  dir: 'ltr' | 'rtl'
 }
 
-export type SpicePreference = 'normal' | 'mild' | 'hot'
+export const LANGUAGES: Language[] = [
+  { code: 'fr', name: 'Français',  flag: '🇫🇷', dir: 'ltr' },
+  { code: 'en', name: 'English',   flag: '🇬🇧', dir: 'ltr' },
+  { code: 'ar', name: 'العربية',   flag: '🇲🇦', dir: 'rtl' },
+]
 
-export type CartItem = {
-  key: string
-  dishId: string
-  name: string
-  unitPrice: number
-  quantity: number
-  removed: string[]
-  extras: Extra[]
-  spice: SpicePreference
-  note: string
-}
-
-export type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'ready' | 'served' | 'cancelled'
-
-export type PaymentMethod = 'counter' | 'table'
-
-export type Order = {
-  id: string
-  number: number
-  table: number
-  items: CartItem[]
-  total: number
-  status: OrderStatus
-  payment: PaymentMethod
-  createdAt: number
-  updatedAt: number
-  rating?: number
-  comment?: string
-}
-
-export type BillRequest = {
-  id: string
-  table: number
-  createdAt: number
-  resolved: boolean
-}
-
-export type TableInfo = { number: number; seats: number; zone: string }
-
-export type Staff = { id: string; name: string; role: 'admin' | 'serveur' | 'cuisine'; active: boolean }
+/* ── Restaurants ─────────────────────────────── */
 
 export type Restaurant = {
   id: string
@@ -75,18 +29,73 @@ export type Restaurant = {
   description: string
   logo: string
   status: 'active' | 'suspended'
-  plan: 'starter' | 'growth' | 'enterprise'
+  languages: string[]   // codes langue activés pour ce resto
   createdAt: number
-  scanOrders: number
 }
+
+/* ── Menu ────────────────────────────────────── */
+
+export type Category = {
+  id: string
+  restaurantId: string
+  name: MLText
+  order: number
+}
+
+export type Dish = {
+  id: string
+  restaurantId: string
+  categoryId: string
+  name: MLText
+  description: MLText
+  price: number
+  image: string
+  available: boolean
+  popular?: boolean
+}
+
+/* ── Tables ──────────────────────────────────── */
+
+export type TableInfo = {
+  id: string
+  restaurantId: string
+  number: number
+  seats: number
+  zone: string
+}
+
+/* ── Commandes ───────────────────────────────── */
+
+export type CartItem = {
+  key: string
+  dishId: string
+  name: string        // nom dans la langue du client
+  unitPrice: number
+  quantity: number
+}
+
+export type OrderStatus = 'active' | 'paid'
+
+export type Order = {
+  id: string
+  number: number
+  restaurantId: string
+  tableNumber: number
+  lang: string
+  items: CartItem[]
+  total: number
+  status: OrderStatus
+  createdAt: number
+  paidAt?: number
+}
+
+/* ── État global ─────────────────────────────── */
 
 export type AppState = {
   restaurants: Restaurant[]
-  activeRestaurantId: string
+  categories: Category[]
   dishes: Dish[]
   tables: TableInfo[]
   orders: Order[]
-  billRequests: BillRequest[]
-  staff: Staff[]
   nextOrderNumber: number
 }

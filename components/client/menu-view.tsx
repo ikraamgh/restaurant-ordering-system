@@ -1,189 +1,224 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { ArrowLeft, Heart, ReceiptText, Search } from 'lucide-react'
-import { useFavorites } from '@/lib/favorites'
-import { MOMENTS } from '@/lib/seed'
-import type { CartItem, Dish, DishTag, Moment } from '@/lib/types'
+import { useState } from 'react'
+import Image from 'next/image'
+import { ShoppingCart, Star } from 'lucide-react'
+import { t } from '@/lib/seed'
 import { cn } from '@/lib/utils'
-import { DishCard } from './dish-card'
-import { DICT, type Lang } from './i18n'
-import { LangSwitch } from './lang-switch'
+import { formatPrice } from '@/lib/format'
+import type { AppState, CartItem, Restaurant } from '@/lib/types'
 
-const TAGS: DishTag[] = ['vegetarian', 'spicy', 'meat', 'fish', 'dessert']
-
-type Props = {
-  table: number
-  lang: Lang
-  onLangChange: (l: Lang) => void
-  moment: Moment
-  onMomentChange: (m: Moment | null) => void
-  dishes: Dish[]
-  onOpenDish: (d: Dish) => void
-  onQuickAdd: (item: CartItem) => void
-  onOpenOrders: () => void
-  activeOrders: number
+const UI: Record<string, { menu: string; popular: string; unavailable: string; add: string; cart: string; table: string }> = {
+  fr: { menu: 'Menu', popular: 'Populaire', unavailable: 'Épuisé', add: 'Ajouter', cart: 'Panier', table: 'Table' },
+  en: { menu: 'Menu', popular: 'Popular',   unavailable: 'Out of stock', add: 'Add',    cart: 'Cart',   table: 'Table' },
+  ar: { menu: 'قائمة الطعام', popular: 'الأكثر طلبًا', unavailable: 'نفذ', add: 'أضف',  cart: 'السلة', table: 'طاولة' },
 }
 
-export function MenuView(props: Props) {
-  const { table, lang, onLangChange, moment, onMomentChange, dishes, onOpenDish, onQuickAdd, onOpenOrders, activeOrders } = props
-  const t = DICT[lang]
-  const [query, setQuery] = useState('')
-  const [tag, setTag] = useState<DishTag | 'favorites' | null>(null)
-  const { favorites, toggle } = useFavorites()
+export function MenuView({
+  restaurant,
+  lang,
+  state,
+  cart,
+  tableNumber,
+  onAddToCart,
+  onOpenCart,
+  totalQty,
+}: {
+  restaurant: Restaurant
+  lang: string
+  state: AppState
+  cart: CartItem[]
+  tableNumber: number
+  onAddToCart: (item: CartItem) => void
+  onOpenCart: () => void
+  totalQty: number
+}) {
+  const ui = UI[lang] ?? UI.fr
+  const categories = state.categories
+    .filter((c) => c.restaurantId === restaurant.id)
+    .sort((a, b) => a.order - b.order)
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    return dishes.filter((d) => {
-      if (q) {
-        const haystack = [d.name, d.description, d.category, ...d.ingredients].join(' ').toLowerCase()
-        if (!haystack.includes(q)) return false
-      } else if (!d.moments.includes(moment)) return false
-      if (tag === 'favorites') return favorites.includes(d.id)
-      if (tag) return d.tags.includes(tag)
-      return true
-    })
-  }, [dishes, query, moment, tag, favorites])
+  const dishes = state.dishes.filter((d) => d.restaurantId === restaurant.id)
 
-  const grouped = useMemo(() => {
-    const map = new Map<string, Dish[]>()
-    for (const d of filtered) map.set(d.category, [...(map.get(d.category) ?? []), d])
-    return [...map.entries()]
-  }, [filtered])
+  const [activeCat, setActiveCat] = useState<string>(categories[0]?.id ?? 'all')
+
+  const visibleDishes =
+    activeCat === 'all'
+      ? dishes.filter((d) => d.available)
+      : dishes.filter((d) => d.categoryId === activeCat && d.available)
+
+  const cartQty = (dishId: string) =>
+    cart.find((i) => i.dishId === dishId)?.quantity ?? 0
 
   return (
-    <div className="mx-auto min-h-dvh max-w-lg pb-32">
-      <header className="sticky top-0 z-30 border-b border-border/60 bg-background/90 backdrop-blur-lg">
-        <div className="flex items-center gap-3 px-4 pt-4">
-          <button
-            type="button"
-            onClick={() => onMomentChange(null)}
-            className="flex size-10 items-center justify-center rounded-full bg-muted transition-colors hover:bg-secondary"
-            aria-label={t.changeMoment}
-          >
-            <ArrowLeft className="size-4 rtl:rotate-180" />
-          </button>
-          <div className="flex min-w-0 flex-1 flex-col">
-            <span className="font-serif text-lg font-semibold leading-tight">Dar Zitoun</span>
-            <span className="text-xs text-muted-foreground">
-              {t.table} {table}
-            </span>
+    <div className="flex flex-col min-h-dvh bg-background">
+      {/* ── Header ── */}
+      <header className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur">
+        <div className="flex items-center justify-between gap-4 px-4 py-3">
+          <div>
+            <h1 className="font-serif text-lg font-semibold leading-tight">{restaurant.name}</h1>
+            <p className="text-xs text-muted-foreground">
+              {ui.table} {tableNumber}
+            </p>
           </div>
-          <button
-            type="button"
-            onClick={onOpenOrders}
-            className="relative flex size-10 items-center justify-center rounded-full bg-muted transition-colors hover:bg-secondary"
-            aria-label={t.myOrders}
-          >
-            <ReceiptText className="size-4" />
-            {activeOrders > 0 && (
-              <span className="absolute -end-0.5 -top-0.5 flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                {activeOrders}
-              </span>
-            )}
-          </button>
-          <LangSwitch lang={lang} onChange={onLangChange} />
-        </div>
-
-        <div className="px-4 pt-3">
-          <label className="relative block">
-            <span className="sr-only">{t.search}</span>
-            <Search className="pointer-events-none absolute start-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={t.search}
-              className="h-11 w-full rounded-full border border-border bg-card ps-10 pe-4 text-sm outline-none transition-shadow placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/15"
-            />
-          </label>
-        </div>
-
-        <nav aria-label="Moments" className="no-scrollbar flex gap-1 overflow-x-auto px-4 pt-3">
-          {MOMENTS.map((m) => (
+          {/* Cart button (mobile header) */}
+          {totalQty > 0 && (
             <button
-              key={m.id}
               type="button"
-              onClick={() => {
-                onMomentChange(m.id)
-                setQuery('')
-              }}
-              aria-current={moment === m.id && !query ? 'page' : undefined}
-              className={cn(
-                'relative shrink-0 px-3 pb-3 pt-1 text-sm font-medium transition-colors',
-                moment === m.id && !query ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
-              )}
+              onClick={onOpenCart}
+              className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
             >
-              {t.moments[m.id]}
-              {moment === m.id && !query && (
-                <span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-primary" aria-hidden="true" />
-              )}
+              <ShoppingCart className="size-4" />
+              {totalQty}
             </button>
-          ))}
-        </nav>
+          )}
+        </div>
+
+        {/* Category tabs */}
+        {categories.length > 0 && (
+          <nav className="no-scrollbar flex gap-1 overflow-x-auto px-4 pb-3">
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setActiveCat(cat.id)}
+                className={cn(
+                  'shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
+                  activeCat === cat.id
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:text-foreground',
+                )}
+              >
+                {t(cat.name, lang)}
+              </button>
+            ))}
+          </nav>
+        )}
       </header>
 
-      <div className="no-scrollbar flex gap-2 overflow-x-auto px-4 py-4" role="group" aria-label="Filtres">
-        <FilterChip active={tag === null} onClick={() => setTag(null)}>
-          {t.all}
-        </FilterChip>
-        <FilterChip active={tag === 'favorites'} onClick={() => setTag(tag === 'favorites' ? null : 'favorites')}>
-          <Heart className="size-3.5" />
-          {t.favorites}
-        </FilterChip>
-        {TAGS.map((tg) => (
-          <FilterChip key={tg} active={tag === tg} onClick={() => setTag(tag === tg ? null : tg)}>
-            {t.tags[tg]}
-          </FilterChip>
-        ))}
-      </div>
+      {/* ── Dish Grid ── */}
+      <main className="flex-1 p-4 pb-28">
+        {visibleDishes.length === 0 ? (
+          <div className="mt-20 flex flex-col items-center gap-3 text-center text-muted-foreground">
+            <span className="text-4xl">🍽️</span>
+            <p className="text-sm">{ui.unavailable}</p>
+          </div>
+        ) : (
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {visibleDishes.map((dish) => {
+              const qty = cartQty(dish.id)
+              return (
+                <li
+                  key={dish.id}
+                  className="flex gap-3 rounded-2xl border border-border bg-card p-3 transition-shadow hover:shadow-sm"
+                >
+                  {/* Image */}
+                  <div className="relative size-24 shrink-0 overflow-hidden rounded-xl bg-muted">
+                    <Image
+                      src={dish.image || '/placeholder.svg'}
+                      alt={t(dish.name, lang)}
+                      fill
+                      sizes="96px"
+                      className="object-cover"
+                    />
+                    {dish.popular && (
+                      <span className="absolute top-1 start-1 flex items-center gap-0.5 rounded-full bg-amber-400 px-1.5 py-0.5 text-[10px] font-bold text-amber-900">
+                        <Star className="size-2.5 fill-amber-900" /> {ui.popular}
+                      </span>
+                    )}
+                  </div>
 
-      <main className="flex flex-col gap-8 px-4">
-        {grouped.length === 0 && (
-          <p className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-            {t.noResults}
-          </p>
-        )}
-        {grouped.map(([category, items]) => (
-          <section key={category} aria-labelledby={`cat-${category}`}>
-            <h2 id={`cat-${category}`} className="mb-3 font-serif text-xl font-semibold">
-              {category}
-            </h2>
-            <ul className="flex flex-col gap-3">
-              {items.map((d) => (
-                <li key={d.id}>
-                  <DishCard
-                    dish={d}
-                    t={t}
-                    isFavorite={favorites.includes(d.id)}
-                    onToggleFavorite={() => toggle(d.id)}
-                    onOpen={() => onOpenDish(d)}
-                    onQuickAdd={onQuickAdd}
-                  />
+                  {/* Info */}
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <p className="font-semibold leading-tight line-clamp-2">
+                      {t(dish.name, lang)}
+                    </p>
+                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground leading-relaxed">
+                      {t(dish.description, lang)}
+                    </p>
+                    <div className="mt-auto flex items-center justify-between gap-2 pt-2">
+                      <span className="font-semibold text-primary tabular-nums">
+                        {formatPrice(dish.price, lang)}
+                      </span>
+
+                      {qty === 0 ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            onAddToCart({
+                              key: `${dish.id}-${Date.now()}`,
+                              dishId: dish.id,
+                              name: t(dish.name, lang),
+                              unitPrice: dish.price,
+                              quantity: 1,
+                            })
+                          }
+                          className="flex h-8 items-center gap-1 rounded-full bg-primary px-3 text-xs font-semibold text-primary-foreground active:scale-95"
+                        >
+                          + {ui.add}
+                        </button>
+                      ) : (
+                        <div className="flex items-center gap-2 rounded-full bg-primary/10 px-2 py-1">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              onAddToCart({
+                                key: `${dish.id}-${Date.now()}`,
+                                dishId: dish.id,
+                                name: t(dish.name, lang),
+                                unitPrice: dish.price,
+                                quantity: -1,
+                              })
+                            }
+                            className="flex size-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground"
+                          >
+                            −
+                          </button>
+                          <span className="w-4 text-center text-sm font-semibold tabular-nums">
+                            {qty}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              onAddToCart({
+                                key: `${dish.id}-${Date.now()}`,
+                                dishId: dish.id,
+                                name: t(dish.name, lang),
+                                unitPrice: dish.price,
+                                quantity: 1,
+                              })
+                            }
+                            className="flex size-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground"
+                          >
+                            +
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </li>
-              ))}
-            </ul>
-          </section>
-        ))}
+              )
+            })}
+          </ul>
+        )}
       </main>
-    </div>
-  )
-}
 
-function FilterChip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={cn(
-        'flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
-        active
-          ? 'border-foreground bg-foreground text-background'
-          : 'border-border bg-card text-foreground hover:border-foreground/30',
+      {/* ── Floating cart button ── */}
+      {totalQty > 0 && (
+        <div className="fixed bottom-6 start-0 end-0 z-20 flex justify-center px-4">
+          <button
+            type="button"
+            onClick={onOpenCart}
+            className="flex w-full max-w-sm items-center justify-between gap-3 rounded-2xl bg-foreground px-5 py-4 text-background shadow-2xl active:scale-[0.98] transition-transform"
+          >
+            <span className="flex size-7 items-center justify-center rounded-full bg-background/20 text-sm font-bold">
+              {totalQty}
+            </span>
+            <span className="font-semibold">{ui.cart}</span>
+            <ShoppingCart className="size-5" />
+          </button>
+        </div>
       )}
-    >
-      {children}
-    </button>
+    </div>
   )
 }
